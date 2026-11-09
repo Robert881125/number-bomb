@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151619">
+  <meta name="description" content="2–8 人猜數字派對遊戲。開房邀請朋友，輪流縮小範圍，猜中炸彈的人輸。">
+  <title>猜數字炸彈｜BOMB 01</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+  <script src="online.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <span class="brand"><span class="signal" aria-hidden="true"></span> BOMB / 01</span>
+      <span class="badge">2–8 人遊戲</span>
+    </header>
+
+    <section id="home" class="layout" aria-labelledby="title">
+      <div class="intro">
+        <div class="art" aria-hidden="true">
+          <span class="art-mark">FIG. 01</span>
+          <svg viewBox="0 0 220 166" width="220" height="166" fill="none">
+            <path d="M25 133h171M40 144h140" stroke="#474952" stroke-width="2"/>
+            <circle cx="107" cy="95" r="51" fill="#24262c" stroke="#f8ce57" stroke-width="3"/>
+            <path d="M82 117c-14-16-13-35 1-50" stroke="#5e606b" stroke-width="5" stroke-linecap="round"/>
+            <path d="m119 45 9-14 22 13-8 14" fill="#24262c" stroke="#f8ce57" stroke-width="3"/>
+            <path d="M141 36c5-14 13-20 29-16m0-10v-7m8 12 8-5m-6 13 10 3m-18 2 2 8" stroke="#f8ce57" stroke-width="3" stroke-linecap="round"/>
+            <path d="M104 87h9l-1 19h-7l-1-19Zm1 24h7v7h-7v-7Z" fill="#f8ce57"/>
+            <path d="M37 66h12m-6-6v12m127 42h12m-6-6v12" stroke="#696b76" stroke-width="2"/>
+          </svg>
+          <span class="art-mark right">01 — 100</span>
+        </div>
+        <p class="eyebrow">THE NUMBER BOMB</p>
+        <h1 id="title">猜數字<span>炸彈</span></h1>
+        <p class="description">炸彈藏在 1 到 100 之間。輪流猜數字，每猜一次就縮小範圍。猜中炸彈的人輸！</p>
+      </div>
+
+      <div class="panel setup">
+        <h2>開始遊戲</h2>
+        <div class="modes" aria-label="遊戲模式">
+          <button type="button" id="online-mode" aria-pressed="true">線上連線</button>
+          <button type="button" id="local-mode" aria-pressed="false">同機輪流</button>
+        </div>
+        <form id="online-form">
+          <label for="nickname">你的暱稱</label>
+          <input id="nickname" maxlength="16" placeholder="例如：拆彈小隊長" required autocomplete="nickname">
+          <button type="submit" class="primary wide" value="host">建立房間 <span aria-hidden="true">↗</span></button>
+          <div class="divider">或加入好友的房間</div>
+          <label for="code">房間碼</label>
+          <div class="inline">
+            <input id="code" maxlength="6" placeholder="6 碼英數" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <button type="submit" class="secondary" value="join">加入</button>
+          </div>
+        </form>
+        <form id="local-form" hidden>
+          <label for="local-names">玩家暱稱 <small>每行一位，2–8 人</small></label>
+          <textarea id="local-names" rows="4" maxlength="135" required>玩家 1
+玩家 2</textarea>
+          <button type="submit" class="primary wide">開始同機遊戲 <span aria-hidden="true">↗</span></button>
+        </form>
+        <p id="home-status" class="message" role="status"></p>
+      </div>
+    </section>
+
+    <section id="room" class="room" aria-labelledby="room-title" hidden>
+      <div class="room-head">
+        <div>
+          <p class="eyebrow" id="room-mode"></p>
+          <h1 id="room-title" tabindex="-1">猜數字<span>炸彈</span></h1>
+        </div>
+        <button type="button" class="secondary" id="leave">離開遊戲</button>
+      </div>
+
+      <div class="room-grid">
+        <div class="panel board">
+          <p class="eyebrow" id="round-label"></p>
+          <h2 id="turn-status" role="status"></h2>
+          <div id="range" class="range" aria-label="可猜範圍">
+            <output id="low">1</output><span aria-hidden="true">—</span><output id="high">100</output>
+          </div>
+          <p id="board-hint" class="description"></p>
+          <form id="guess-form" hidden>
+            <label for="guess">輸入範圍內的整數</label>
+            <div class="inline">
+              <input id="guess" type="number" inputmode="numeric" step="1" required autocomplete="off">
+              <button type="submit" class="primary">送出</button>
+            </div>
+          </form>
+          <button type="button" class="primary wide" id="start">開始遊戲</button>
+          <p id="room-status" class="message" role="status"></p>
+        </div>
+
+        <aside class="panel sidebar">
+          <div id="invite">
+            <div class="section-head">
+              <h2>房間碼</h2>
+              <button type="button" class="text-button" id="copy">複製邀請</button>
+            </div>
+            <p id="room-code" class="room-code"></p>
+          </div>
+          <div class="section-head">
+            <h2>玩家</h2><span id="player-count" class="badge"></span>
+          </div>
+          <ul id="players" class="list"></ul>
+          <h2 class="history-title">出牌紀錄</h2>
+          <p id="empty-history" class="description">還沒有猜測。</p>
+          <ol id="history" class="list history"></ol>
+        </aside>
+      </div>
+    </section>
+    <footer><span>NUMBER BOMB</span><span>猜中，就引爆。</span></footer>
+  </main>
+</body>
+</html>
